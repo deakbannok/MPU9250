@@ -1,8 +1,10 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 /*
+* GYROSCOPE    = Angular rate sensors.
 * TEMPERATURE  = ((TEMP_OUT – RoomTemp_Offset)/Temp_Sensitivity) + (21 deg C)
 * MAGNETOMETER = Y:North-South, X:East-West, Z:Up-Down
+  32760 to -32760
 */
 class MPU9250 {
   public:

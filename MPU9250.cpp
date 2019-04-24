@@ -7,56 +7,51 @@ MPU9250::MPU9250(){
   Wire.begin();
 }
 void MPU9250::getAccXYZ(int16_t*ax, int16_t*ay, int16_t*az){
-  uint8_t axl, axh, ayl, ayh, azl, azh;
+  Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
+  Wire.write(ACCEL_XOUT_H);
+  Wire.endTransmission();
 
-  axl = readRegister(ACCEL_XOUT_L);
-  axh = readRegister(ACCEL_XOUT_H);
-  ayl = readRegister(ACCEL_YOUT_L);
-  ayh = readRegister(ACCEL_YOUT_H);
-  azl = readRegister(ACCEL_ZOUT_L);
-  azh = readRegister(ACCEL_ZOUT_H);
-
-  *ax = (axh << 8) | axl;
-  *ay = (ayh << 8) | ayl;
-  *az = (azh << 8) | azl;
+  Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 6);
+  while(Wire.available()){
+    *ax = (Wire.read() << 8 | Wire.read());
+    *ay = (Wire.read() << 8 | Wire.read());
+    *az = (Wire.read() << 8 | Wire.read());
+  }
 }
 
 void MPU9250::getGyrXYZ(int16_t*gx, int16_t*gy, int16_t*gz){
-  uint8_t gxl, gxh, gyl, gyh, gzl, gzh;
+  Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
+  Wire.write(GYRO_XOUT_H);
+  Wire.endTransmission();
 
-  gxl = readRegister(GYRO_XOUT_L);
-  gxh = readRegister(GYRO_XOUT_H);
-  gyl = readRegister(GYRO_YOUT_L);
-  gyh = readRegister(GYRO_YOUT_H);
-  gzl = readRegister(GYRO_ZOUT_L);
-  gzh = readRegister(GYRO_ZOUT_H);
-
-  *gx = (gxh << 8) | gxl;
-  *gy = (gyh << 8) | gyl;
-  *gz = (gzh << 8) | gzl;
+  Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 6);
+  while(Wire.available()){
+    *gx = (Wire.read() << 8 | Wire.read());
+    *gy = (Wire.read() << 8 | Wire.read());
+    *gz = (Wire.read() << 8 | Wire.read());
+  }
 }
 
 void MPU9250::getTemp(int16_t* t){
-  uint8_t tl, th;
+  Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
+  Wire.write(TEMP_OUT_H);
+  Wire.endTransmission();
 
-  tl = readRegister(TEMP_OUT_L);
-  th = readRegister(TEMP_OUT_H);
-
-  *t=(th << 8) | tl;
+  Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 2);
+  while(Wire.available()){
+    *t = (Wire.read() << 8 | Wire.read());
+  }
 }
-uint8_t MPU9250::readRegister(const uint8_t addr){
-  uint8_t data = 0;
 
+uint8_t MPU9250::readRegister(const uint8_t addr){
   Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
   Wire.write(addr);
   Wire.endTransmission();
 
   Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 1);
   if(Wire.available()){
-    data = Wire.read();
+    return Wire.read();
   }
-
-  return data;
 }
 void MPU9250::writeRegister(const uint8_t addr, const uint8_t value){
     Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
@@ -68,6 +63,7 @@ void MPU9250::writeRegister(const uint8_t addr, const uint8_t value){
 *****************************************************************
 * Magnetometer
 * @see INT_PIN_CFG
+* It can only BYPASS one register per request.
 */
 void MPU9250::getMagXYZ(int16_t*mx, int16_t*my, int16_t*mz){
   uint8_t mxl, mxh, myl, myh, mzl, mzh;
@@ -91,19 +87,27 @@ void MPU9250::getMagXYZ(int16_t*mx, int16_t*my, int16_t*mz){
   *mx = (mxh << 8) | mxl;
   *my = (myh << 8) | myl;
   *mz = (mzh << 8) | mzl;
+    mxl = readMagRegister(MAG_XOUT_L);
+    mxh = readMagRegister(MAG_XOUT_H);
+    myl = readMagRegister(MAG_YOUT_L);
+    myh = readMagRegister(MAG_YOUT_H);
+    mzl = readMagRegister(MAG_ZOUT_L);
+    mzh = readMagRegister(MAG_ZOUT_H);
 
+    *mx = ((mxh << 8) | mxl);
+    *my = ((myh << 8) | myl);
+    *mz = ((mzh << 8) | mzl);
 }
 
 uint8_t MPU9250::readMagRegister(const uint8_t addr){
-  uint8_t data = 0;
   Wire.beginTransmission(MPU9250_MAG_ADDRESS);
   Wire.write(addr);
   Wire.endTransmission();
+
   Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 1);
   if(Wire.available()){
-    data = Wire.read();
+    return Wire.read();
   }
-  return data;
 }
 void MPU9250::writeMagRegister(const uint8_t addr, const uint8_t value) {
     Wire.beginTransmission(MPU9250_MAG_ADDRESS);

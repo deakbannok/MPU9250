@@ -77,16 +77,6 @@ void MPU9250::getMagXYZ(int16_t*mx, int16_t*my, int16_t*mz){
     }
   }
 
-  mxl = readMagRegister(MAG_XOUT_L);
-  mxh = readMagRegister(MAG_XOUT_H);
-  myl = readMagRegister(MAG_YOUT_L);
-  myh = readMagRegister(MAG_YOUT_H);
-  mzl = readMagRegister(MAG_ZOUT_L);
-  mzh = readMagRegister(MAG_ZOUT_H);
-
-  *mx = (mxh << 8) | mxl;
-  *my = (myh << 8) | myl;
-  *mz = (mzh << 8) | mzl;
     mxl = readMagRegister(MAG_XOUT_L);
     mxh = readMagRegister(MAG_XOUT_H);
     myl = readMagRegister(MAG_YOUT_L);

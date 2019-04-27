@@ -138,15 +138,15 @@
 
 #define MAG_WIA                 0x00
 #define MAG_INFO                0x01
-#define MAG_ST1                 0x02
+#define MAG_ST1                 0x02 // 0x01=DOR and 0x00=DRDY 
 #define MAG_XOUT_L              0x03 // MAG_XOUT_L[7:0]: X-axis measurement data lower 8bit
 #define MAG_XOUT_H              0x04 // MAG_XOUT_H[15:8]: X-axis measurement data higher 8bit
 #define MAG_YOUT_L              0x05 // MAG_YOUT_L[7:0]: Y-axis measurement data lower 8bit
 #define MAG_YOUT_H              0x06 // MAG_YOUT_H[15:8]: Y-axis measurement data higher 8bit
 #define MAG_ZOUT_L              0x07 // MAG_ZOUT_L[7:0]: Z-axis measurement data lower 8bit
 #define MAG_ZOUT_H              0x08 // MAG_ZOUT_H[15:8]: Z-axis measurement data higher 8bit
-#define MAG_ST2                 0x09
-#define MAG_CNTL                0x0A
+#define MAG_ST2                 0x09 // 0x04=BITM and 0x03=HOFL
+#define MAG_CNTL                0x0A // Powerdown 0x00, Single Bypass 0x01, Selftest 0x08, Fuse ROM access (R) 0x0F.
 #define MAG_RSV                 0x0B
 #define MAG_ASTC                0x0C
 #define MAG_TS1                 0x0D

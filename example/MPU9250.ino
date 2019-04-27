@@ -12,6 +12,7 @@ void setup(){
   while(!Serial){ delay(1000); }
   Serial.println("10 DOF GY-91 MPU9280.");
   timing = millis();
+  TENDOF.begin();
 }
 
 void loop(){

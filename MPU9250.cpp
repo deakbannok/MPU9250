@@ -6,6 +6,10 @@
 MPU9250::MPU9250(){
   Wire.begin();
 }
+void MPU9250::begin(){
+
+}
+
 void MPU9250::getAccXYZ(int16_t*ax, int16_t*ay, int16_t*az){
   Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
   Wire.write(ACCEL_XOUT_H);
@@ -43,65 +47,59 @@ void MPU9250::getTemp(int16_t* t){
   }
 }
 
-uint8_t MPU9250::readRegister(const uint8_t addr){
-  Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
+uint8_t MPU9250::readRegister(const uint8_t host, const uint8_t addr){
+  Wire.beginTransmission(host);
   Wire.write(addr);
   Wire.endTransmission();
 
-  Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 1);
+  Wire.requestFrom(host, 1);
   if(Wire.available()){
     return Wire.read();
   }
 }
-void MPU9250::writeRegister(const uint8_t addr, const uint8_t value){
-    Wire.beginTransmission(MPU9250_DEFAULT_ADDRESS);
+uint8_t MPU9250::writeRegister(const uint8_t host, const uint8_t addr, const uint8_t value){
+    Wire.beginTransmission(host);
     Wire.write(addr);
     Wire.write(value);
-    Wire.endTransmission();
+    return Wire.endTransmission();
+    /*
+    0:success
+    1:data too long to fit in transmit buffer
+    2:received NACK on transmit of address
+    3:received NACK on transmit of data
+    4:other error
+    */
 }
+
 /****************************************************************
 *****************************************************************
 * Magnetometer
-* @see INT_PIN_CFG
-* It can only BYPASS one register per request.
 */
 void MPU9250::getMagXYZ(int16_t*mx, int16_t*my, int16_t*mz){
-  uint8_t mxl, mxh, myl, myh, mzl, mzh;
-
-  // BYPASS_EN
-  // Set I2C bypass enable to access magnetometer.
-  if(bypass_en!=true){
-    if(readRegister(INT_PIN_CFG)!=0x02){
-      writeRegister(INT_PIN_CFG, 0x02);
-      bypass_en=true;
+  uint8_t ST1, ST2;
+  do{
+    Wire.beginTransmission(MPU9250_MAG_ADDRESS);
+    Wire.write(MAG_ST1);
+    Wire.endTransmission();
+    Wire.requestFrom(MPU9250_MAG_ADDRESS, 1);
+    while(Wire.available()){
+    /*
+    * 0x00 = DRDY: Data Ready  ? 0 : 1
+    * 0x01 = DOR: Data Overrun ? 0 : 1
+    */
+      ST1 = Wire.read();
     }
   }
+  while (!(ST1 & 0x01)); // 0x01 = ready | 0x00 = not ready.
 
-    mxl = readMagRegister(MAG_XOUT_L);
-    mxh = readMagRegister(MAG_XOUT_H);
-    myl = readMagRegister(MAG_YOUT_L);
-    myh = readMagRegister(MAG_YOUT_H);
-    mzl = readMagRegister(MAG_ZOUT_L);
-    mzh = readMagRegister(MAG_ZOUT_H);
-
-    *mx = ((mxh << 8) | mxl);
-    *my = ((myh << 8) | myl);
-    *mz = ((mzh << 8) | mzl);
-}
-
-uint8_t MPU9250::readMagRegister(const uint8_t addr){
   Wire.beginTransmission(MPU9250_MAG_ADDRESS);
-  Wire.write(addr);
+  Wire.write(MAG_XOUT_L);
   Wire.endTransmission();
-
-  Wire.requestFrom(MPU9250_DEFAULT_ADDRESS, 1);
-  if(Wire.available()){
-    return Wire.read();
-  }
-}
-void MPU9250::writeMagRegister(const uint8_t addr, const uint8_t value) {
-    Wire.beginTransmission(MPU9250_MAG_ADDRESS);
-    Wire.write(addr);
-    Wire.write(value);
-    Wire.endTransmission();
+  Wire.requestFrom(MPU9250_MAG_ADDRESS, 7);
+    while(Wire.available()){
+      *mx= (Wire.read()<<8) | Wire.read();
+      *my= (Wire.read()<<8) | Wire.read();
+      *mz= (Wire.read()<<8) | Wire.read();
+      ST2 = Wire.read();
+    }
 }

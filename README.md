@@ -7,3 +7,7 @@ To read all the raw data output from MPU9250 multi-chip module (MCM).
 - void **getAccXYZ**(int16_t* ax, int16_t* ay, int16_t* az);
 - void **getGyrXYZ**(int16_t* gx, int16_t* gy, int16_t* gz);
 - void **getTemp**(int16_t* t);
+
+A single Read/Write to MPU9250 register mapping.
+- uint8_t **readRegister**(const uint8_t host, const uint8_t addr);
+- void **writeRegister**(const uint8_t host, const uint8_t addr, const uint8_t value);
